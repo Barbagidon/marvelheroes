@@ -1,5 +1,6 @@
 import { Component } from "react";
 import "./charInfo.scss";
+import PropTypes from "prop-types";
 import MarvelService from "../../services/MarvelService";
 import Skeleton from "../skeleton/Skeleton";
 import Spinner from "../spinner/Spinner";
@@ -33,7 +34,6 @@ class CharInfo extends Component {
   };
 
   onError = () => {
-    
     this.setState({ error: true, loading: false });
   };
 
@@ -42,8 +42,6 @@ class CharInfo extends Component {
     if (!charId) {
       return null;
     }
-
-    
 
     this.onCharOn();
 
@@ -74,8 +72,6 @@ class CharInfo extends Component {
     );
   }
 }
-
-export default CharInfo;
 
 const View = ({ char }) => {
   const { name, description, thumbnail, homepage, wiki, comics } = char;
@@ -130,3 +126,6 @@ const View = ({ char }) => {
     </>
   );
 };
+
+
+export default CharInfo;

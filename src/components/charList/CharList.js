@@ -1,4 +1,5 @@
 import { Component } from "react";
+import PropTypes from "prop-types";
 import MarvelService from "../../services/MarvelService";
 import "./charList.scss";
 import Spinner from "../spinner/Spinner";
@@ -11,7 +12,7 @@ class CharList extends Component {
     loading: true,
     error: false,
     num: 1505,
-    scroll: true,
+    scroll: false,
     charEnded: false,
   };
   marvelServices = new MarvelService();
@@ -23,8 +24,8 @@ class CharList extends Component {
   onCharLoaded = (chars) => {
     this.setState(({ num }) => ({
       chars,
-      loading: false,
       scroll: true,
+      loading: false,
       num: num + 10,
     }));
   };
@@ -37,46 +38,34 @@ class CharList extends Component {
     this.setState({ scroll: false });
   };
 
-  createCardForScroll = () => {
-    const { num, scroll } = this.state;
+  createCardForScroll = (scroll) => {
+    const { num } = this.state;
 
-    if (scroll) {
-      this.marvelServices
-        .getCharacters(`characters?limit=9&offset=${num}`)
-        .then((chars) => {
-          if (chars.length < 9) {
-            this.setState(() => ({
-              charEnded: true,
-            }));
-          }
+    this.marvelServices
+      .getCharacters(`characters?limit=9&offset=${num}`)
+      .then((chars) => {
+        if (!chars || chars.length < 2) {
+          this.setState(() => ({
+            charEnded: true,
+          }));
+        } else {
           const moreChars = this.state.chars.concat(chars);
           this.onCharLoaded(moreChars);
-          this.onScroll();
-        })
-        .catch(() => {});
-    }
+        }
+      });
   };
 
   getBottomWindow = () => {
     const { scroll } = this.state;
-    const getBottom = () => {
-      if (
-        document.documentElement.scrollTop +
-          document.documentElement.clientHeight >=
-        document.documentElement.scrollHeight - 1
-      ) {
-        this.setState(() => ({
-          scroll: true,
-        }));
-        this.createCardForScroll();
-      }
-
-      if (!scroll) {
-        window.removeEventListener("scroll", getBottom);
-      }
-    };
-
-    window.addEventListener("scroll", getBottom);
+    if (
+      document.documentElement.scrollTop +
+        document.documentElement.clientHeight >=
+        document.documentElement.scrollHeight - 1 &&
+      scroll
+    ) {
+      this.createCardForScroll(scroll);
+      this.onScroll();
+    }
   };
 
   getChars = (i) => {
@@ -91,6 +80,11 @@ class CharList extends Component {
     this.marvelServices
       .getCharacters(`characters?limit=9&offset=${num}`)
       .then((chars) => {
+        if (!chars || chars.length < 2) {
+          this.setState(() => ({
+            charEnded: true,
+          }));
+        }
         if (i) {
           const moreChars = this.state.chars.concat(chars);
           this.onCharLoaded(moreChars);
@@ -98,8 +92,6 @@ class CharList extends Component {
           this.onCharOn();
           this.onCharLoaded(chars);
         }
-
-        this.getBottomWindow();
       })
       .catch(() => {
         this.onError();
@@ -122,7 +114,13 @@ class CharList extends Component {
   };
 
   componentDidMount = () => {
+    console.log(this.state.scroll);
     this.getChars();
+    window.addEventListener("scroll", this.getBottomWindow);
+  };
+
+  componentWillUnmount = () => {
+    window.removeEventListener("scroll", this.getBottomWindow);
   };
 
   render() {
@@ -144,13 +142,15 @@ class CharList extends Component {
           {elements}
           {errorMessage}
         </ul>
-        <button
-          className="button button__main button__long"
-          onClick={() => this.getChars(10)}
-          style={{ display: charEnded ? "none" : "block" }}
-        >
-          <div className="inner">load more</div>
-        </button>
+        {
+          <button
+            className="button button__main button__long"
+            onClick={() => this.getChars(10)}
+            style={{ display: charEnded ? "none" : "block" }}
+          >
+            <div className="inner">load more</div>
+          </button>
+        }
       </div>
     );
   }
