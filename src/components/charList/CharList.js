@@ -11,7 +11,7 @@ class CharList extends Component {
     chars: [],
     loading: true,
     error: false,
-    num: 1505,
+    num: 1245,
     scroll: false,
     charEnded: false,
   };
@@ -84,13 +84,14 @@ class CharList extends Component {
           this.setState(() => ({
             charEnded: true,
           }));
-        }
-        if (i) {
-          const moreChars = this.state.chars.concat(chars);
-          this.onCharLoaded(moreChars);
         } else {
-          this.onCharOn();
-          this.onCharLoaded(chars);
+          if (i) {
+            const moreChars = this.state.chars.concat(chars);
+            this.onCharLoaded(moreChars);
+          } else {
+            this.onCharOn();
+            this.onCharLoaded(chars);
+          }
         }
       })
       .catch(() => {
