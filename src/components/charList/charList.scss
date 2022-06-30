@@ -48,3 +48,12 @@
         color: #fff;
     }
 }
+
+.char__item-enter {
+    opacity: 0
+}
+
+.char__item-enter-active {
+    opacity: 1;
+    transition: all 500ms;
+}

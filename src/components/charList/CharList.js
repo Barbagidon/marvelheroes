@@ -1,35 +1,25 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
+
 import MarvelService from "../../services/MarvelService";
 import "./charList.scss";
 import Spinner from "../spinner/Spinner";
 import Error from "../error/Error";
-import CreateContent from "../../hooks/loadToScroll";
+import CreateContent from "../../hooks/createContent";
 
 const CharList = (props) => {
-  // const [chars, setChars] = useState([]);
-  // const [num, setNum] = useState(1245);
-  // const [scroll, setScroll] = useState(false);
-  // const [charEnded, setcharEnded] = useState(false);
-  // const [firstLoading, setFirstLoading] = useState(true);
-
   const { loading, error, getCharacters } = MarvelService();
   const {
- scroll,
- chars,
- num,
- charEnded,
- firstLoading,
- getBottomWindow,
- getChars,
- getContentToScroll,
-setFirstLoading,
-  } = CreateContent(1245);
+    scroll,
+    chars,
+    charEnded,
+    firstLoading,
+    getBottomWindow,
+    getChars,
+    getContentToScroll,
+    loadingProcess,
+  } = CreateContent([], 1245);
   const itemsRefs = useRef([]);
-
-  // const onCharLoaded = (chars) => {
-  //   setChars(chars);
-  //   setNum((num) => num + 10);
-  // };
 
   const onFocus = (i) => {
     itemsRefs.current[i].className = "char__item char__item_selected";
@@ -39,72 +29,18 @@ setFirstLoading,
     itemsRefs.current[i].className = "char__item";
   };
 
-  // const getBottomWindow = () => {
-  //   if (
-  //     document.documentElement.scrollTop +
-  //       document.documentElement.clientHeight >=
-  //     document.documentElement.scrollHeight - 100
-  //   ) {
-  //     setScroll(true);
-  //   }
-  // };
-
-  // const getChars = (i) => {
-  //   if (i) {
-  //     setNum((num) => num + i);
-  //   }
-
-  //   getCharacters(`characters?limit=9&offset=${num}`).then((charsList) => {
-  //     if (!chars || chars.length < -1) {
-  //       setcharEnded(true);
-  //     } else {
-  //       if (i) {
-  //         const moreChars = chars.concat(charsList);
-  //         onCharLoaded(() => moreChars);
-  //       } else {
-  //         onCharLoaded(() => charsList);
-  //       }
-  //     }
-  //   });
-  // };
-
   useEffect(() => {
-    getChars(getCharacters, `characters?limit=9&offset=`);
+    getChars(getCharacters, `characters?limit=9&offset=`, 1);
     window.addEventListener("scroll", getBottomWindow);
+
     return function () {
       window.removeEventListener("scroll", getBottomWindow);
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (chars.length > 9) {
-  //     setFirstLoading(false);
-  //   }
-  // }, [chars]);
-
-  // useEffect(() => {
-  //   if (chars.length > 9) {
-  //     setFirstLoading(false);
-  //   }
-  // }, [chars]);
-
   useEffect(() => {
     if (scroll) {
       getContentToScroll(getCharacters, `characters?limit=9&offset=`);
-
-      // getCharacters(`characters?limit=9&offset=${num}`)
-      //   .then((charsList) => {
-      //     setFirstLoading(false);
-      //     if (!charsList || charsList.length < 2) {
-      //       charEnded(true);
-      //     } else {
-      //       const moreChars = chars.concat(charsList);
-      //       onCharLoaded(moreChars);
-      //     }
-      //   })
-      //   .finally(() => {
-      //     // setScroll(false);
-      //   });
     }
   }, [scroll]);
 
@@ -113,7 +49,8 @@ setFirstLoading,
 
   return (
     <div className="char__list">
-      <ul
+      <TransitionGroup
+        component={"ul"}
         className="char__grid"
         style={{
           gridTemplateColumns:
@@ -127,28 +64,31 @@ setFirstLoading,
             name.length > 34 ? name.substr(0, 28) + "..." : name;
 
           return (
-            <li
-              className="char__item"
-              tabIndex={0}
-              key={id}
-              ref={(el) => (itemsRefs.current[i] = el)}
-              onClick={() => props.getId(id)}
-              onFocus={() => onFocus(i)}
-              onBlur={() => onBlur(i)}
-            >
-              <img
-                src={thumbnail}
-                style={{ objectFit: notImage > 40 ? "fill" : "cover" }}
-                alt="hero"
-              />
-              <div className="char__name">{shortName}</div>
-            </li>
+            <CSSTransition key={id} timeout={500} classNames="char__item">
+              <li
+                className="char__item"
+                tabIndex={0}
+                key={id}
+                ref={(el) => (itemsRefs.current[i] = el)}
+                onClick={() => props.getId(id)}
+                onFocus={() => onFocus(i)}
+                onBlur={() => onBlur(i)}
+              >
+                <img
+                  src={thumbnail}
+                  style={{ objectFit: notImage > 40 ? "fill" : "cover" }}
+                  alt="hero"
+                />
+                <div className="char__name">{shortName}</div>
+              </li>
+            </CSSTransition>
           );
         })}
-        {spinner}
         {errorMessage}
-      </ul>
-      {
+      </TransitionGroup>
+      {loadingProcess ? (
+        <Spinner></Spinner>
+      ) : (
         <button
           className="button button__main button__long"
           onClick={() =>
@@ -158,7 +98,7 @@ setFirstLoading,
         >
           <div className="inner">load more</div>
         </button>
-      }
+      )}
     </div>
   );
 };

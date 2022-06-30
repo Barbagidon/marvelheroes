@@ -17,11 +17,15 @@ const MarvelService = () => {
     return _transformCharacter(res);
   };
 
-  const getComics = async () => {
+  const getComics = async (url, num) => {
     const res = await request(
-      _apiBase + "comics?format=comic&issueNumber=100&limit=8&" + _apiKey
+      _apiBase + `comics?issueNumber=${num}&` + url + "&" + _apiKey
     );
+    return _transformComics(res);
+  };
 
+  const getComic = async (id) => {
+    const res = await request(_apiBase + "comics/" + id + "?" + _apiKey);
     return _transformComics(res);
   };
 
@@ -30,14 +34,23 @@ const MarvelService = () => {
 
     const comicses = result.map((item) => {
       const origTitle = item.title;
-      const indexDelete = origTitle.indexOf("#100");
-      const shortName = origTitle.slice(0, indexDelete);
+      const indexDelete = origTitle.indexOf("#");
+      const shortName =
+        indexDelete > -1 ? origTitle.slice(0, indexDelete) : origTitle;
       return {
         id: item.id,
+        description: item.description
+          ? item.description
+          : "Sorry, we dont have  description for this comic:(",
+        pages: item.pageCount,
         title: shortName,
         url: item.urls[0].url,
         thumbnail: item.thumbnail.path + "." + item.thumbnail.extension,
-        price: item.prices[0].price,
+        price:
+          item.prices[0].price === 0
+            ? "Out of stock"
+            : item.prices[0].price + "$",
+        language: item.textObjects.language || "en-us",
       };
     });
 
@@ -76,7 +89,15 @@ const MarvelService = () => {
     }
   };
 
-  return { loading, error, getCharacters, getCharacter, сlearError, getComics };
+  return {
+    loading,
+    error,
+    getCharacters,
+    getCharacter,
+    сlearError,
+    getComics,
+    getComic,
+  };
 };
 
 export default MarvelService;

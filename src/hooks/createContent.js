@@ -1,15 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
-const CreateContent = (offsetNumber) => {
+const CreateContent = (
+  objectType,
+  offsetNumber,
+  loadingStep = 10,
+  isComicsList = false
+) => {
   const [scroll, setScroll] = useState(false);
-  const [chars, setChars] = useState([]);
+  const [chars, setChars] = useState(objectType);
   const [num, setNum] = useState(offsetNumber);
   const [charEnded, setcharEnded] = useState(false);
   const [firstLoading, setFirstLoading] = useState(true);
+  const [issueNumber, setIssueNumber] = useState(1);
+  const [loadingProcess, setLoadingProcess] = useState(false);
+  const [anim, setAnim] = useState(false);
 
   const onCharLoaded = (chars) => {
     setChars(chars);
-    setNum((num) => num + 10);
+    setNum((num) => num + loadingStep);
+    setIssueNumber((issueNumber) => issueNumber + 1);
   };
 
   const getBottomWindow = () => {
@@ -24,12 +33,14 @@ const CreateContent = (offsetNumber) => {
   };
 
   const getContentToScroll = (requestFoo, url) => {
-    requestFoo(url + num)
+    setLoadingProcess(true);
+    requestFoo(url + num, issueNumber) ///     getContentToScroll(getComics, `limit=8&offset=`);
       .then((charsList) => {
         if (!charsList || charsList.length < 2) {
           setcharEnded(true);
         } else {
           const moreChars = chars.concat(charsList);
+          setLoadingProcess(false);
           onCharLoaded(moreChars);
         }
       })
@@ -42,9 +53,11 @@ const CreateContent = (offsetNumber) => {
     if (i) {
       setNum((num) => num + i);
     }
-    
-    requestFoo(url + num).then((charsList) => {
-        setFirstLoading(false);
+    setLoadingProcess(true);
+    requestFoo(url + num, issueNumber).then((charsList) => {
+      setFirstLoading(false);
+      setLoadingProcess(false);
+
       if (!chars || chars.length < -1) {
         setcharEnded(true);
       } else {
@@ -58,6 +71,15 @@ const CreateContent = (offsetNumber) => {
     });
   };
 
+  const updateChar = (getCharacter) => {
+    const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
+    setAnim(true);
+
+    getCharacter(id).then((res) => {
+      onCharLoaded(res);
+    });
+  };
+
   return {
     scroll,
     chars,
@@ -68,6 +90,10 @@ const CreateContent = (offsetNumber) => {
     getChars,
     getContentToScroll,
     setFirstLoading,
+    updateChar,
+    loadingProcess,
+    setAnim,
+    anim,
   };
 };
 

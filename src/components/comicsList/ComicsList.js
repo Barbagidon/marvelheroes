@@ -1,26 +1,36 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import "./comicsList.scss";
 import MarvelService from "../../services/MarvelService";
 import Spinner from "../spinner/Spinner";
 import { Link } from "react-router-dom";
-import Error from "../error/Error";
+import CreateContent from "../../hooks/createContent";
 const ComicsList = () => {
-  const { loading, error, getComics } = MarvelService();
-  const [firstLoading, setFirstLoading] = useState(true);
+  const { loading, getComics } = MarvelService();
 
-  const [comicses, setComicses] = useState([]);
+  const {
+    scroll,
+    chars,
+    firstLoading,
+    getBottomWindow,
+    getChars,
+    getContentToScroll,
+    loadingProcess,
+  } = CreateContent([], 111, 10);
 
-  const createComics = () => {
-    getComics().then((res) => {
-      setComicses(res);
-    });
-  };
-
-  useState(() => {
-    createComics();
+  useEffect(() => {
+    getChars(getComics, "limit=8&offset=");
+    window.addEventListener("scroll", getBottomWindow);
+    return function () {
+      window.removeEventListener("scroll", getBottomWindow);
+    };
   }, []);
 
-  const spinner = loading && firstLoading ? <Spinner /> : null;
+  useEffect(() => {
+    if (scroll) {
+      getContentToScroll(getComics, `limit=8&offset=`);
+    }
+  }, [scroll]);
+
   return (
     <div className="comics__list">
       <ul
@@ -31,8 +41,8 @@ const ComicsList = () => {
           justifyContent: loading && firstLoading ? "center" : null,
         }}
       >
-        {comicses.map((item) => {
-          const { title, url, thumbnail, price, id } = item;
+        {chars.map((item) => {
+          const { title, thumbnail, price, id } = item;
 
           return (
             <li className="comics__item" key={id}>
@@ -43,16 +53,22 @@ const ComicsList = () => {
                   className="comics__item-img"
                 />
                 <div className="comics__item-name">{title}</div>
-                <div className="comics__item-price">{price}$</div>
+                <div className="comics__item-price">{price}</div>
               </Link>
             </li>
           );
         })}
-        {spinner}
       </ul>
-      <button className="button button__main button__long">
-        <div className="inner">load more</div>
-      </button>
+      {loadingProcess ? (
+        <Spinner></Spinner>
+      ) : (
+        <button
+          className="button button__main button__long"
+          onClick={() => getChars(getComics, "limit=8&offset=", 10)}
+        >
+          <div className="inner">load more</div>
+        </button>
+      )}
     </div>
   );
 };
