@@ -11,8 +11,16 @@ const MarvelService = () => {
     return _transformCharacter(res);
   };
 
-  const getCharacter = async (id) => {
-    const res = await request(_apiBase + "characters/" + id + "?" + _apiKey);
+  const getCharacter = async (id, name) => {
+    const res = name
+      ? await request(
+          _apiBase +
+            "characters?nameStartsWith=" +
+            name +
+            "&orderBy=-modified&limit=1&" +
+            _apiKey
+        )
+      : await request(_apiBase + "characters/" + id + "?" + _apiKey);
 
     return _transformCharacter(res);
   };

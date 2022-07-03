@@ -14,9 +14,11 @@ const CreateContent = (
   const [issueNumber, setIssueNumber] = useState(1);
   const [loadingProcess, setLoadingProcess] = useState(false);
   const [anim, setAnim] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
 
   const onCharLoaded = (chars) => {
     setChars(chars);
+
     setNum((num) => num + loadingStep);
     setIssueNumber((issueNumber) => issueNumber + 1);
   };
@@ -71,13 +73,24 @@ const CreateContent = (
     });
   };
 
-  const updateChar = (getCharacter) => {
+  const updateChar = (getCharacter, name) => {
     const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
     setAnim(true);
-
-    getCharacter(id).then((res) => {
-      onCharLoaded(res);
-    });
+    if (!name) {
+      getCharacter(id).then((res) => {
+        onCharLoaded(res);
+      });
+    } else {
+      getCharacter(false, name).then((res) => {
+        setChars("");
+        const result = [];
+        if (res) {
+          result.push(res);
+          onCharLoaded(result);
+        }
+        setShowMessage(true);
+      });
+    }
   };
 
   return {
@@ -94,6 +107,8 @@ const CreateContent = (
     loadingProcess,
     setAnim,
     anim,
+    showMessage,
+    setShowMessage,
   };
 };
 

@@ -51,7 +51,6 @@ const RandomChar = () => {
 };
 
 const View = ({ char, anim, setAnim }) => {
-  console.log(anim);
   if (char) {
     const { name, thumbnail, description, homepage, wiki } = char;
 

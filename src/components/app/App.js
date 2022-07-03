@@ -9,6 +9,9 @@ const ComicsPage = lazy(() => import("../pages/ComicsPage"));
 const SingleComicPage = lazy(() => {
   return import("../pages/SingleComicPage");
 });
+const SingleChar = lazy(() => {
+  return import("../pages/SingleChar");
+});
 
 const App = () => {
   return (
@@ -25,6 +28,10 @@ const App = () => {
                 element={<SingleComicPage />}
               ></Route>
               <Route path="*" element={<Page404 />}></Route>
+              <Route
+                path="/:name"
+                element={<SingleComicPage createSingleChar={true} />}
+              ></Route>
             </Routes>
           </main>
         </Suspense>
