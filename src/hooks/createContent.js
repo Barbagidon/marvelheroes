@@ -1,4 +1,6 @@
 import { useState } from "react";
+import setContent from "../utils/setContent";
+import MarvelService from "../services/MarvelService";
 
 const CreateContent = (
   objectType,
@@ -16,9 +18,10 @@ const CreateContent = (
   const [anim, setAnim] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
 
+  const { process, setProcess } = MarvelService();
+
   const onCharLoaded = (chars) => {
     setChars(chars);
-
     setNum((num) => num + loadingStep);
     setIssueNumber((issueNumber) => issueNumber + 1);
   };
@@ -36,7 +39,7 @@ const CreateContent = (
 
   const getContentToScroll = (requestFoo, url) => {
     setLoadingProcess(true);
-    requestFoo(url + num, issueNumber) ///     getContentToScroll(getComics, `limit=8&offset=`);
+    requestFoo(url + num, issueNumber)
       .then((charsList) => {
         if (!charsList || charsList.length < 2) {
           setcharEnded(true);
@@ -74,6 +77,7 @@ const CreateContent = (
   };
 
   const updateChar = (getCharacter, name) => {
+
     const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000);
     setAnim(true);
     if (!name) {

@@ -7,8 +7,10 @@ import Spinner from "../spinner/Spinner";
 import Error from "../error/Error";
 import CreateContent from "../../hooks/createContent";
 
+
 const CharList = (props) => {
-  const { loading, error, getCharacters } = MarvelService();
+  const { loading, error, getCharacters } =
+    MarvelService();
   const {
     scroll,
     chars,
@@ -44,7 +46,6 @@ const CharList = (props) => {
     }
   }, [scroll]);
 
-  const spinner = loading && firstLoading ? <Spinner /> : null;
   const errorMessage = error ? <Error /> : null;
 
   return (

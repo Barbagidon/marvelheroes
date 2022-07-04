@@ -2,35 +2,24 @@ import "./randomChar.scss";
 import { useEffect, useState } from "react";
 import { CSSTransition } from "react-transition-group";
 
-import Error from "../error/Error";
-import Spinner from "../spinner/Spinner";
 import mjolnir from "../../resources/img/mjolnir.png";
 import MarvelService from "../../services/MarvelService";
 import CreateContent from "../../hooks/createContent";
+import setContent from "../../utils/setContent";
 
 const RandomChar = () => {
   const [buttonOn] = useState(true);
-  const { loading, error, getCharacter } = MarvelService();
-  const { chars, updateChar, anim, setAnim } = CreateContent({});
+  const { getCharacter, process, setProcess } = MarvelService();
+  const { chars, updateChar } = CreateContent({});
 
   useEffect(() => {
     updateChar(getCharacter);
+    setProcess("loading");
   }, []);
-
-  const errorMessage = error ? <Error /> : null;
-  const spinner = loading ? <Spinner /> : null;
-  const heroInfo = !(error || loading) ? (
-    <View char={chars} anim={anim} setAnim={setAnim} />
-  ) : null;
 
   return (
     <div className="randomchar">
-      {errorMessage}
-
-      {spinner}
-
-      {heroInfo}
-
+      {setContent(process, View, chars)}
       <div className="randomchar__static">
         <p className="randomchar__title">
           Random character for today!
@@ -50,9 +39,9 @@ const RandomChar = () => {
   );
 };
 
-const View = ({ char, anim, setAnim }) => {
-  if (char) {
-    const { name, thumbnail, description, homepage, wiki } = char;
+const View = ({ data, anim, setAnim }) => {
+  if (data) {
+    const { name, thumbnail, description, homepage, wiki } = data;
 
     let notImage;
     if (thumbnail) {
@@ -96,8 +85,6 @@ const View = ({ char, anim, setAnim }) => {
         </div>
       </CSSTransition>
     );
-  } else {
-    return <Error />;
   }
 };
 

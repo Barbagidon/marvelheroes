@@ -31,7 +31,6 @@ const SingleComicPage = (createSingleChar) => {
       }}
     >
       {chars.map((item) => {
-        console.log(item);
         return (
           <Fragment key={item.id}>
             <Helmet>
